@@ -17,9 +17,9 @@ const grid: number[][] = []
 
 const defaultAngle = Math.PI * 0.25
 
-for (let x = 0; x < nCols; x++) {
+for (let x = leftX; x < nCols; x++) {
   const row: number[] = []
-  for (let y = 0; y < nRows; y++) {
+  for (let y = topY; y < nRows; y++) {
     const angle = (y / nRows) * Math.PI
     row.push(angle)
   }
@@ -30,27 +30,67 @@ const sketch = (p: p5) => {
   function drawGrid() {
     for (let x = 0; x < nCols; x++) {
       for (let y = 0; y < nRows; y++) {
-        // p.point(x * resolution, y * resolution)
         const theta = grid[x][y]
         const nx = Math.cos(theta)
         const ny = Math.sin(theta)
+        p.strokeWeight(1)
         p.line(
           x * resolution,
           y * resolution,
           (x + nx / 1.5) * resolution,
           (y + ny / 1.5) * resolution
         )
+        p.strokeWeight(4)
+        p.point((x + nx / 1.5) * resolution, (y + ny / 1.5) * resolution)
       }
     }
+  }
+
+  function drawCurve(xStart: number, yStart: number, nSteps: number = 200) {
+    p.beginShape()
+    let x = xStart
+    let y = yStart
+    for (let n = 0; n < nSteps; n++) {
+      p.vertex(x, y)
+
+      const xi = Math.round(x / resolution)
+      const yi = Math.round(y / resolution)
+
+      if (xi < 0 || xi >= grid.length) {
+        continue
+      }
+      if (yi < 0 || yi >= grid[xi].length) {
+        continue
+      }
+
+      const gridAngle = grid[xi][yi]
+
+      const xStep = Math.cos(gridAngle) * width * 0.005
+      const yStep = Math.sin(gridAngle) * width * 0.005
+
+      x += xStep
+      y += yStep
+    }
+    p.endShape()
   }
 
   p.setup = () => {
     const canvas = p.createCanvas(width, height)
     canvas.parent("p5-canvas")
     p.stroke(255)
+    p.noFill()
     p.strokeWeight(1)
 
-    drawGrid()
+    // drawGrid()
+    p.stroke(255, 0, 0)
+    p.strokeWeight(1)
+    for (let n = 0; n < 100; n++) {
+      drawCurve(
+        Math.random() * width,
+        Math.random() * height,
+        Math.floor(Math.random() * 100)
+      )
+    }
   }
 
   p.draw = () => {}
